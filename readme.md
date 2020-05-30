@@ -13,9 +13,7 @@
 
 * Server 拿 Flask 架
 * Game Page 最後應該會長成這個樣子：
-  * `def generateGamePage(expected_pass_time, token):`
-  * `	......	`
-  * `	return javascript`
+  * <code>def generateGamePage(expected_pass_time, token):<br>	...... <br>	return javascript</code>
 
 
 
