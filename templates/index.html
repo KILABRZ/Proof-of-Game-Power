@@ -1,0 +1,35 @@
+<html>
+<head>
+	<title>
+		Example Index
+	</title>
+</head>	
+<body style='background-color: #030303'>
+	<canvas id="canvas" height="924" width="1920">
+	<script>
+		var canvas = document.getElementById("canvas").getContext("2d");
+		var height = window.innerHeight;
+		var width = window.innerWidth;
+		canvas.fillStyle = "#0FF";
+		canvas.font = "120px JetBrains Mono";
+		canvas.fillText(" Hello, Canvas,", 0, 120);
+		canvas.fillText(" this is an example page,", 0, 250);
+		canvas.fillText(" text fades out,", 0, 380);
+		canvas.fillText(" canvas is so cool.", 0, 510);
+		canvas.fillText(" Yaaaaaaaaaaaaaaaaa.", 0, 770);
+
+		function fadeout(canvas, speed){
+			canvas.fillStyle = "rgba(0, 0, 0, "+speed+")";
+			canvas.fillRect(0, 0, width, height);
+		}
+
+		function draw()
+		{
+			fadeout(canvas, 0.01);
+		}
+
+		setInterval(draw, 500);
+	</script>
+</body>
+
+</html>
