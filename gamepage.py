@@ -11,12 +11,12 @@ from base64 import b64encode, b64decode
 
 def arbKey(keystring):
 	h = SHA256.new()
-	h.update(bytes(keystring, 'ascii'))
+	h.update(bytes(keystring, 'utf-8'))
 	return h.digest()
 
 def arbID(idstring):
 	h = SHA256.new()
-	h.update(bytes(idstring, 'ascii'))
+	h.update(bytes(idstring, 'utf-8'))
 	return h.digest()[:16]
 
 def OTP(aToken, bToken):
@@ -34,7 +34,7 @@ def generateTimeToken(useT, expET, userId, gameKey, tokenLength):
 	theTimeToken = aes.nonce + encryptedToken
 	return theTimeToken
 
-def generatePassToken(useT, userId, gameKey, tokenLength):
+def generatePassToken(useT, expET, userId, gameKey, tokenLength):
 	serverTime = int(time())
 	validTime = bytes(str(serverTime).rjust(12, '0'), 'ascii')
 	expiredTime = bytes(str(serverTime + expET + useT).rjust(12, '0'), 'ascii')
@@ -46,19 +46,27 @@ def generatePassToken(useT, userId, gameKey, tokenLength):
 	thePassToken = aes.nonce + encryptedToken
 	return thePassToken
 
+def generateToken(useT, expET, userId, gameKey, tokenLength):
+	timeToken = generateTimeToken(useT, expET, userId, gameKey, tokenLength)
+	passToken = generatePassToken(useT, expET, userId, gameKey, tokenLength)
+	return timeToken, passToken
+
 def verifyToken(userId, token, gameKey):
 	try:
 		token = b64decode(token)
 	except:
 		return False
 
-	nonce = token[:16]
+	xnonce = token[:16]
 	encryptedToken = token[16:]
-	aes = AES.new(gameKey, nonce=nonce AES.MODE_GCM)
+	aes = AES.new(gameKey, AES.MODE_GCM, nonce=xnonce)
+
 	try:
 		recoveryToken = aes.decrypt(encryptedToken)
 	except:
 		return False
+
+
 
 	t_userId = recoveryToken[:16]
 	t_validTime = int(str(recoveryToken[16:28], 'ascii'))
@@ -88,17 +96,19 @@ def gen_gamepage_template(useT, expET, userId, gameKey):
 
 	tokenLength = decide_tokenLength(expET)
 
-	timeToken = generateTimeToken(useT, expET, userId, gameKey, tokenLength)
-	passToken = generatePassToken(useT, expET, userId, gameKey, tokenLength)
+	timeToken, passToken = generateToken(useT, expET, userId, gameKey, tokenLength)
 	probToken = urandom(tokenLength)
 
 	print(passToken)
-	print(probToken)
 
 	xxxxToken = OTP(passToken, probToken)
 	recoToken = OTP(xxxxToken, probToken)
 
 	print(recoToken)
+
+	presToken = b64encode(passToken)
+
+	print(verifyToken(userId, presToken, gameKey))
 
 
 
