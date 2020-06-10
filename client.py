@@ -1,19 +1,35 @@
-from scapy.all import *
-from scapy.layers.http import  HTTP, HTTPRequest
+import requests
+from threading import Thread
+import os
+from base64 import b64encode, b64decode
+from time import time
+timeRecord = []
 
-srcIP = '127.0.0.1'
-desIP = '127.0.0.1'
-srcPort = 1234
-desPort = 8000
+def dos(i):
+	global timeRecord
 
-load_layer('http')
-req = IP(src=srcIP, dst=desIP) / TCP(sport=srcPort, dport=desPort) / HTTP() / HTTPRequest(
-	Connection=b'keep-alive',
-	Cache_Control=b'no-cache',
-	Upgrade_Insecure_Requests=b'1',
-	Accept=b'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-	Accept_Encoding=b'gzip, defalte, br',
-	Host = b'localhost:8000') 
+	nowtime = time()
+	print(i, 'launch')
 
-req.show()
-send(req)
+	fakesession = os.urandom(20)
+	fakesession = str(b64encode(fakesession), 'ascii')
+	cookies = {'SESSION_ID' : fakesession}
+	r = requests.get('http://localhost:8000/service', cookies=cookies)
+
+	endtime = time()
+	print(i, 'finish')
+	timeRecord.append(endtime - nowtime)
+
+N = 100
+Ts = [Thread(target=dos, args=(t,)) for t in range(N)]
+
+for T in Ts:
+	T.start()
+
+for T in Ts:
+	T.join()
+
+print('End')
+print('Max response time =', max(timeRecord))
+print('All time record = ', timeRecord)
+
