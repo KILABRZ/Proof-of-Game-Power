@@ -3,7 +3,10 @@ from cookies_and_tokens import *
 from threading import Thread
 from time import time, sleep
 from Crypto.Util.number import getPrime
+from random import choice, randint
+from gamepage import *
 import copy
+from base64 import b64encode, b64decode
 
 webService = Flask(__name__)
 
@@ -13,11 +16,15 @@ webState['ratio'] = 1
 webState['timelock'] = 0
 webState['counter_threhold'] = 50
 webState['ratio_threhold'] = 2
+webState['allow_time'] = 1800
+
+serverSuperKey = arbKey('KEY{YEHA_Server_SUPER_Key!!!!!!!!!!!!!!!!!!!!!}')
 
 def webMonitor():
 	global webState
 
 	dt = 2
+	lastinTime = time()
 	preState = copy.deepcopy(webState)
 	while True:
 		delta_people = webState['people_counter'] - preState['people_counter']
@@ -36,6 +43,12 @@ def webMonitor():
 			webState['timelock'] += (webState['people_counter'] - webState['counter_threhold']) * 3
 		if webState['ratio'] >= webState['ratio_threhold']:
 			webState['timelock'] += (webState['ratio'] - webState['ratio_threhold']) * 5
+
+		nowtime = time()
+		if nowtime + webState['timelock'] <= lastinTime:
+			webState['timelock'] = lastinTime - nowtime
+		else:
+			lastinTime = nowtime + webState['timelock']
 		sleep(dt)
 
 
@@ -61,10 +74,16 @@ def importantService():
 	if s == None:
 		return redirect(url_for('index'))
 
+	userId = arbID(s)
 
+	if webState['timelock'] != 0:
+		r = request.cookies.get('PASS_TOKEN')
+		if r == 'None':
+			return redirect(url_for('challenge'))
+		if not verify_token(userId, r, serverSuperKey):
+			return redirect(url_for('challenge'))
 
 	webState['people_counter'] += 1
-
 
 # Service
 
@@ -75,7 +94,21 @@ def importantService():
 	webState['people_counter'] -= 1
 	return str(s)
 
+@webService.route('/challenge')
+def challenge():
 
+	validDuration = webState['allow_time']
+	validTime = webState['timelock']
+	userId = arbID(request.cookies.get('SESSION_ID'))
+	gameKey = serverSuperKey
+
+	x = randint(0, 0)
+	if x == 0:
+		game, timetoken = gen_quiz_page(validDuration, validTime, userId, gameKey)
+		timetoken = b64encode(timetoken)
+		resp = make_response(game)
+		resp.set_cookie('PASS_TOKEN', timetoken)
+		return resp
 
 
 if __name__ == '__main__':
