@@ -15,6 +15,12 @@
 * Game Page 最後應該會長成這個樣子：
   * <code>def generateGamePage(expected_pass_time, token):<br>	...... <br>	return javascript</code>
 
+### 隱藏 Token 的方法
+
+* 數獨
+* 拼圖
+  * 爆搜排列很浪費時間
+
 
 
 
