@@ -28,7 +28,7 @@ def gen_gamepage_template(useT, expET, userId, gameKey):
 
 
 def gen_quiz_page(validDuration, validTime, userId, gameKey):
-	problemCount = min(validTime // 4 + 1, 10)
+	problemCount = min(validTime // 10 + 1, 10)
 	problems = open('./resource/quiz/problems.txt', 'r').read().split('\n')[:-1]
 	shuffle(problems)
 	problems = problems[:problemCount]
@@ -42,25 +42,43 @@ def gen_quiz_page(validDuration, validTime, userId, gameKey):
 	tokenLength = max(len(probToken), 60)
 	timeToken, passToken = generateToken(validDuration, validTime, userId, gameKey, tokenLength)
 	if len(probToken) < 60:
-		probToken = probToken + passToken[len(probToken):]
+		probToken = probToken + b'\x00' * len(passToken[len(probToken):])
 	
 
 	xxxxToken = OTP(passToken, probToken)
 
-	htmlheader = '<html><title> Speed Quiz {} !!!</title><body>\
-	<canvas id=\"canvas\" height=\"924\" width=\"1920\"><script>'.format(problemCount)
-	
-	script  = 'var canvas = document.getElementById(\"canvas\").getContext(\"2d\");'
-	script += 'var height = window.innerHeight, width = window.innerWidth;'
-	script += 'canvas.fillStyle = \'#000\';'
-	textSize = 40
-	linespace = 10
-	script += 'canvas.font = \'{}px Arial\';'.format(textSize)
+	htmlheader = '<html><title> Speed Quiz {} !!!</title><body>'.format(problemCount)
+
+	script = '<h1 style="text-align: center; font-size: 80px; margin-bottom: 30px;"> Finish Quiz !!!</h1>'
 	for i, problem in enumerate(problems):
 		p, a = problem.split(';')
-		script += 'canvas.fillText(\"{}\", 0, {})'.format(p, (i+1) * textSize + i * linespace)
+		script += '<div style="display: flex; justify-content: center; align-items: center; height: 8vh; width: 100%; margin-bottom: 15px;">'
+		script += '<div style="display: inline-block; font-size: 40px; margin-right: 30px;"> {} </div>'.format(p)
+		script += '<div style="display: inline-block; width: 10%; "><input id="{}" style="font-size: 40px;border :2px black solid; width: 100%;" type="text"> </input> </div>'.format(i)
+		script += '</div>'
 
-	htmltailer = '</script></body></html>'
+	script += '<div style="display: flex; justify-content: center; align-items: center; height: 8vh; width: 100%; margin-bottom: 15px;">'
+	script += '<div style="display: inline-block; width: 10%; "> <button id="submit_button" style="font-size: 40px;"> Submit </button> </div>'
+	script += '</div>'
+	script += '<h1 style="text-align: center; font-size: 20px; margin-bottom: 12px;"> or pass after X seconds. </h1>'
+	
+
+	script += '<script>'
+
+	script += 'var xxxxToken = "{}";'.format(str(b64encode(xxxxToken), 'ascii'))
+	script += 'var recoToken = "";'
+	script += 'var ssssToken = "";'
+	script += 'var totalProblems = {};'.format(problemCount)
+	script += 'var e = function(){for(var i=0;i<totalProblems;i++){var s = document.getElementById(i).value.toString(); recoToken += s;}'
+	script += 'xxxxToken = atob(xxxxToken);'
+	script += 'for(var i=0;i<recoToken.length;i++){ssssToken += String.fromCharCode(xxxxToken[i].charCodeAt(0) ^ recoToken[i].charCodeAt(0));}'
+	script += 'xxxxToken = ssssToken + xxxxToken.substr(recoToken.length);'
+	script += 'document.cookie = document.cookie.split(";")[0] + "; PASS_TOKEN=" + btoa(xxxxToken);'
+	script += 'window.location = window.location.origin + "/service"; };'
+	script += 'document.getElementById("submit_button").addEventListener("click", e);'
+
+	script += '</script>'
+	htmltailer = '</body></html>'
 
 	js = htmlheader + script + htmltailer
 	print(js)

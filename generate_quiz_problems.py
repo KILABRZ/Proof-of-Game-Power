@@ -11,7 +11,7 @@ for i in range(MathProblems):
 	x = randint(1, 499)
 	y = randint(1, 499)
 	z = x + y
-	problem = '{} + {}'.format(x, y)
+	problem = '{} + {} ='.format(x, y)
 	answer = '{}'.format(z)
 
 	pushProblem_Answer(problemSheet, problem, answer)

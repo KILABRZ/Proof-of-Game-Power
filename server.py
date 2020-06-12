@@ -5,6 +5,7 @@ from time import time, sleep
 from Crypto.Util.number import getPrime
 from random import choice, randint
 from gamepage import *
+from cookies_and_tokens import *
 import copy
 from base64 import b64encode, b64decode
 
@@ -13,10 +14,11 @@ webService = Flask(__name__)
 webState = dict()
 webState['people_counter'] = 0
 webState['ratio'] = 1
-webState['timelock'] = 0
+webState['timelock'] = 30
 webState['counter_threhold'] = 50
 webState['ratio_threhold'] = 2
 webState['allow_time'] = 1800
+webState['basic_time_lock'] = 30
 
 serverSuperKey = arbKey('KEY{YEHA_Server_SUPER_Key!!!!!!!!!!!!!!!!!!!!!}')
 
@@ -38,7 +40,7 @@ def webMonitor():
 
 		if webState['people_counter'] < webState['counter_threhold'] and \
 			webState['ratio'] < webState['ratio_threhold']:
-			webState['timelock'] = 0
+			webState['timelock'] = webState['basic_time_lock']
 		if webState['people_counter'] >= webState['counter_threhold']:
 			webState['timelock'] += (webState['people_counter'] - webState['counter_threhold']) * 3
 		if webState['ratio'] >= webState['ratio_threhold']:
@@ -80,7 +82,7 @@ def importantService():
 		r = request.cookies.get('PASS_TOKEN')
 		if r == 'None':
 			return redirect(url_for('challenge'))
-		if not verify_token(userId, r, serverSuperKey):
+		if not verifyToken(userId, r, serverSuperKey):
 			return redirect(url_for('challenge'))
 
 	webState['people_counter'] += 1
