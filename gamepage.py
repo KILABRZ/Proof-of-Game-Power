@@ -60,11 +60,13 @@ def gen_quiz_page(validDuration, validTime, userId, gameKey):
 	script += '<div style="display: flex; justify-content: center; align-items: center; height: 8vh; width: 100%; margin-bottom: 15px;">'
 	script += '<div style="display: inline-block; width: 10%; "> <button id="submit_button" style="font-size: 40px;"> Submit </button> </div>'
 	script += '</div>'
-	script += '<h1 style="text-align: center; font-size: 20px; margin-bottom: 12px;"> or pass after X seconds. </h1>'
+	script += '<h1 style="text-align: center; font-size: 20px; margin-bottom: 12px;"> or pass after <b id = "supernumber"> X </b> seconds. </h1>'
 	
 
 	script += '<script>'
-
+	script += 'var initialWT = {};'.format(validTime+3)
+	script += 'var s = function(){ if(initialWT <= 0) { initialWT = 0; return 0;} initialWT--; document.getElementById("supernumber").innerHTML = initialWT; if(initialWT <= 0) { window.location = window.location.origin + "/service"; } };'
+	script += 'window.setInterval(s, 1000);'
 	script += 'var xxxxToken = "{}";'.format(str(b64encode(xxxxToken), 'ascii'))
 	script += 'var recoToken = "";'
 	script += 'var ssssToken = "";'

@@ -18,7 +18,7 @@ webState['timelock'] = 30
 webState['counter_threhold'] = 50
 webState['ratio_threhold'] = 2
 webState['allow_time'] = 1800
-webState['basic_time_lock'] = 30
+webState['basic_time_lock'] = 5
 
 serverSuperKey = arbKey('KEY{YEHA_Server_SUPER_Key!!!!!!!!!!!!!!!!!!!!!}')
 
