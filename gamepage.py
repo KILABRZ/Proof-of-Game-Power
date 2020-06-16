@@ -93,32 +93,58 @@ def CHUNKKKKKKKKKKKKING(s, n):
 	chp = [s[int(i*dl):int((i+1)*dl)] for i in range(n)]
 	return chp
 
-def randomPuzzleRotate(puzzlePack, n):
-	rotate0 = [2, 0, 3, 1]
-	rotate1_0 = [0, 1, 2, 3, 4, 9, 5, 7, 8, 10, 6, 11, 12, 13, 14, 15]
-	rotate1_1 = [4, 0, 1, 2, 8, 5, 6, 3, 12, 9, 10, 7, 13, 14, 15, 11]
-	rotate_2_0 = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 20, 14, 16, 17, 18, 19, 21, 15, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35]
-	rotate_2_1 = [0, 1, 2, 3, 4, 5, 6, 13, 7, 8, 9, 11, 12, 19, 14, 15, 10, 17, 18, 25, 20, 21, 16, 23, 24, 26, 27, 28, 22, 29, 30, 31, 32, 33, 34, 35]
-	rotate_2_2 = [6, 0, 1, 2, 3, 4, 12, 7, 8, 9, 10, 5, 18, 13, 14, 15, 16, 11, 24, 19, 20, 21, 22, 17, 30, 25, 26, 27, 28, 23, 31, 32, 33, 34, 35, 29]
+def randomPuzzleRotate(puzzlePack, difficulty):
 
-	rlen = (4, 12, 20)
-	rotating = [[rotate0], [rotate1_0, rotate1_1], [rotate_2_0, rotate_2_1, rotate_2_2]][n]
+	w = (2, 4, 6, 8, 10, 12, 14, 16, 18, 20)[difficulty]
+	r = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10)[difficulty]
+	piv = (w-1) / 2
 
-	for i, rotate in enumerate(rotating):
-		s = randint(rlen[i]//2, rlen[i]-1)
-		
-		npp = [0 for j in range(len(puzzlePack))]
-		for _ in range(s):
-			for i, r in enumerate(rotate):
-				npp[i] = puzzlePack[r]
-			puzzlePack = list(tuple(npp))
+	N = r ** 2 + 20
+
+	order = [i for i in range(w*w)]
+	neworder = [i for i in range(w*w)]
+
+	ring_position = [[] for i in range(r)]
+	next_position = [None for i in range(w*w)]
+	prev_position = [None for i in range(w*w)]
+
+	for i in range(w):
+		for j in range(w):
+			tr = int(max(abs(i - piv), abs(j - piv)))
+			if j >= i and i+j < piv * 2:
+				d = 0
+			elif i+j >= piv*2 and j > i:
+				d = 1
+			elif i+j > piv*2 and i >= j:
+				d = 2
+			elif i+j <= piv * 2 and i >= j:
+				d = 3
+			di = [0, 1, 0, -1][d]
+			dj = [1, 0, -1, 0][d]
+			ni, nj = i+di, j+dj
+			idx, nidx = i*w+j, ni*w+nj
+
+			ring_position[tr].append(idx)
+			next_position[idx] = nidx
+			prev_position[nidx] = idx
+
+
+	for t in range(N):
+		rr = randint(0, r-1)
+		for idx in ring_position[rr]:
+			nidx = prev_position[idx]
+			neworder[nidx] = order[idx]
+		order = list(tuple(neworder))
+	puzzlePack= [puzzlePack[c] for c in order]
+
 	return puzzlePack
 
 
+
 def gen_rotating_puzzle_page(validDuration, validTime, userId, gameKey):
-	totalDifficulties = 3
-	difficulty = min(totalDifficulties-1, validTime // 30)
-	puzzleCount = (4, 16, 36)[difficulty]
+	totalDifficulties = 10
+	difficulty = min(totalDifficulties-1, validTime // 5)
+	puzzleCount = (4, 16, 36, 64, 100, 144, 192, 256, 324, 400)[difficulty]
 
 	problemList = open('./static/rotating_puzzle/problemlist.txt', 'r').read().split('\n')[:-1]
 	problemList = [c.split(',') for c in problemList]
@@ -145,6 +171,3 @@ if __name__ == '__main__':
 	userId = arbID('user')
 	serverSuperKey = arbKey('KEY{YEHA_Server_SUPER_Key!!!!!!!!!!!!!!!!!!!!!}')
 	gen_rotating_puzzle_page(10, 100, userId, serverSuperKey)
-
-# vyGPvrWY6v0f6pTbnRb5V//WJeq794/1K0FyXF4NOKdR5o5hCXnyv3NTnnG9trHOcmylkXDMGS6T652kkqJF6LMy4ow3NHhWf/gWZrtob+WimisoalQ70TbKg0GH4SqlT6EYLFc23E94Cfjhn4277rEAAeWjgbTkDG3xvmmKf3F5DH8pSTqpbpgPuMm1iYnMLs4SJgF1h4jG9OxqQ1Uf3D+Ot+lwktTNViGKmWHbJU+IOaWhFxnGVInSavIRNIS+4o1JLaOks8Rbr96qbHhicIYfnrf5QAGU
-# vyGPvrWY6v0f6pTbnRb5V//WJeq794/1K0FyXF4NOKdR5o5hCXnyv3NTnnG9trHOcmylkXDMGS6T652kkqJF6LMy4ow3NHhWf/gWZrtob+WimisoalQ70TbKg0GH4SqlT6EYLFc23E94Cfjhn4277rEAAeWjgbTkDG3xvmmKf3F5DH8pSTqpbpgPuMm1iYnMLs4SJgF1h4jG9OxqQ1Uf3D+Ot+lwktTNViGKmWHbJU+IOaWhFxnGVInSavIRNIS+4o1JLaOks8Rbr96qbHhicIYfnrf5QAGU

@@ -18,7 +18,7 @@ webState['timelock'] = 30
 webState['counter_threhold'] = 50
 webState['ratio_threhold'] = 2
 webState['allow_time'] = 1800
-webState['basic_time_lock'] = 10
+webState['basic_time_lock'] = 200
 
 serverSuperKey = arbKey('KEY{YEHA_Server_SUPER_Key!!!!!!!!!!!!!!!!!!!!!}')
 
@@ -100,6 +100,9 @@ def importantService():
 
 @webService.route('/challenge')
 def challenge():
+	s = request.cookies.get('SESSION_ID')
+	if s == None:
+		return redirect(url_for('index'))
 
 	validDuration = webState['allow_time']
 	validTime = webState['timelock']

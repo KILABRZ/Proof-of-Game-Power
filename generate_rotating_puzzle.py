@@ -8,8 +8,8 @@ difficulty = int(sys.argv[1])
 originImage = sys.argv[2]
 problemName = sys.argv[3]
 
-if difficulty not in (0, 1, 2):
-	print('0, 1, 2')
+if difficulty not in (0, 1, 2, 3, 4, 5, 6, 7, 8, 9):
+	print('0, 1, 2, 3, 4, 5, 6, 7, 8, 9')
 	exit()
 
 supercharset = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -20,10 +20,10 @@ def randomName():
 
 im = Image.open(originImage)
 
-s = (300, 500, 600)[difficulty]
-w = (2, 4, 6)[difficulty]
-b = (150, 125, 100)[difficulty]
-n = (4, 16, 36)[difficulty]
+s = (300, 500, 600, 640, 700, 720, 770, 800, 810, 900)[difficulty]
+w = (2, 4, 6, 8, 10, 12, 14, 16, 18, 20)[difficulty]
+b = (150, 125, 100, 80, 70, 60, 55, 50, 45, 45)[difficulty]
+n = (4, 16, 36, 64, 100, 144, 196, 256, 324, 400)[difficulty]
 
 im = im.resize((s, s))
 

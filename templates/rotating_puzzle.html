@@ -24,25 +24,17 @@
 
 		var difficulty = {{ difficulty }};
 
-		var w_with_difficulty = new Array(2, 4, 6);
-		var n_with_difficulty = new Array(4, 16, 36);
-		var s_with_difficulty = new Array(300, 500, 600);
-		var b_with_difficulty = new Array(150, 125, 100);
+		var w_with_difficulty = new Array(2, 4, 6, 8, 10, 12, 14, 16, 18, 20);
+		var n_with_difficulty = new Array(4, 16, 36, 64, 100, 144, 196, 256, 324, 400);
+		var s_with_difficulty = new Array(300, 500, 600, 640, 700, 720, 770, 800, 810, 900);
+		var b_with_difficulty = new Array(150, 125, 100, 80, 70, 60, 55, 50, 45, 45);
 
 		var w = w_with_difficulty[difficulty];
 		var s = s_with_difficulty[difficulty];
 		var b = b_with_difficulty[difficulty];
 		var n = n_with_difficulty[difficulty];
 
-		var rotate0 = [2, 0, 3, 1];
-		var rotate1_0 = [0, 1, 2, 3, 4, 9, 5, 7, 8, 10, 6, 11, 12, 13, 14, 15];
-		var rotate1_1 = [4, 0, 1, 2, 8, 5, 6, 3, 12, 9, 10, 7, 13, 14, 15, 11];
-		var rotate_2_0 = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 20, 14, 16, 17, 18, 19, 21, 15, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35];
-		var rotate_2_1 = [0, 1, 2, 3, 4, 5, 6, 13, 7, 8, 9, 11, 12, 19, 14, 15, 10, 17, 18, 25, 20, 21, 16, 23, 24, 26, 27, 28, 22, 29, 30, 31, 32, 33, 34, 35];
-		var rotate_2_2 = [6, 0, 1, 2, 3, 4, 12, 7, 8, 9, 10, 5, 18, 13, 14, 15, 16, 11, 24, 19, 20, 21, 22, 17, 30, 25, 26, 27, 28, 23, 31, 32, 33, 34, 35, 29];
-
-		var rotating = [[rotate0], [rotate1_1, rotate1_0], [rotate_2_2, rotate_2_1, rotate_2_0]][difficulty]
-
+		var piv = (w-1) / 2;
 
 		var imgs = new Array(n);
 		var tokens = new Array(n);
@@ -77,10 +69,36 @@
 		function rotateRing(r){
 			cvx.clearRect(0, 0, s, s);
 			var neworder = new Array(n);
-			for(var i=0;i<n;i++){
-				neworder[i] = rotating[r][order[i]];
+			for(var i=0;i<w;i++){
+				for(var j=0;j<w;j++){
+					var nr = Math.floor(Math.max(Math.abs(i - piv), Math.abs(j - piv)));
+					if(r == nr){
+						var d = -1;
+						if(j >= i && i+j < w-1)d = 0;
+						else if(i+j >= w-1 && j > i)d = 1;
+						else if(i+j > w-1 && i >= j)d = 2;
+						else if(i+j <= w-1 && i >= j)d = 3;
+						var di = 0, dj = 0;
+						if(d == 0)dj = 1;
+						else if(d == 1)di = 1;
+						else if(d == 2)dj = -1;
+						else if(d == 3)di = -1;
+
+						var ni = i + di, nj = j+dj;
+						var nidx = ni * w + nj;
+						var idx = i * w + j;
+						console.log(d);
+						console.log(idx);
+						console.log(nidx);
+						neworder[nidx] = order[idx];
+					}else{
+						var idx = i * w + j;
+						neworder[idx] = order[idx];
+					}
+				}
 			}
 			order = neworder;
+			console.log(neworder);
 			drawPuzzle();
 		}
 		function TMpos(e){
@@ -102,7 +120,7 @@
 					break;
 				}
 			}
-			rotateRing(r);
+			rotateRing(Math.abs(Math.floor(w/2) - r - 1));
 		}
 		var passToken = "";
 		var submite = function(){
