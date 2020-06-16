@@ -1,0 +1,124 @@
+<html>
+
+<head>
+	<title>
+		Rotating Puzzle !!!
+	</title>
+	<style>
+		.tb {
+		border-radius: 100px;
+		transition: all 0.5s linear;  
+		}
+	</style>
+</head>
+
+<body style="background: #300000;">
+	<div style="display: flex; justify-content: center; align-items: center; height: 95vh; width: 100%; margin-bottom: 15px;">
+	<canvas id = "canvas" style = "border: 2px solid black;"> </canvas>
+	<button class = "tb" id="goodbutton" style="border: 2px solid black;width: 15%; height: 15vh; font-size:60px; margin-left: 70px;  background: #000000; color: #FFFFFF"> Finish </button>
+
+	<div>
+	<script>
+		var cv = document.getElementById("canvas");
+		var cvx = cv.getContext("2d");
+
+		var difficulty = {{ difficulty }};
+
+		var w_with_difficulty = new Array(2, 4, 6);
+		var n_with_difficulty = new Array(4, 16, 36);
+		var s_with_difficulty = new Array(300, 500, 600);
+		var b_with_difficulty = new Array(150, 125, 100);
+
+		var w = w_with_difficulty[difficulty];
+		var s = s_with_difficulty[difficulty];
+		var b = b_with_difficulty[difficulty];
+		var n = n_with_difficulty[difficulty];
+
+		var rotate0 = [2, 0, 3, 1];
+		var rotate1_0 = [0, 1, 2, 3, 4, 9, 5, 7, 8, 10, 6, 11, 12, 13, 14, 15];
+		var rotate1_1 = [4, 0, 1, 2, 8, 5, 6, 3, 12, 9, 10, 7, 13, 14, 15, 11];
+		var rotate_2_0 = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 20, 14, 16, 17, 18, 19, 21, 15, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35];
+		var rotate_2_1 = [0, 1, 2, 3, 4, 5, 6, 13, 7, 8, 9, 11, 12, 19, 14, 15, 10, 17, 18, 25, 20, 21, 16, 23, 24, 26, 27, 28, 22, 29, 30, 31, 32, 33, 34, 35];
+		var rotate_2_2 = [6, 0, 1, 2, 3, 4, 12, 7, 8, 9, 10, 5, 18, 13, 14, 15, 16, 11, 24, 19, 20, 21, 22, 17, 30, 25, 26, 27, 28, 23, 31, 32, 33, 34, 35, 29];
+
+		var rotating = [[rotate0], [rotate1_1, rotate1_0], [rotate_2_2, rotate_2_1, rotate_2_0]][difficulty]
+
+
+		var imgs = new Array(n);
+		var tokens = new Array(n);
+
+		{% for img in puzzlePack %}
+			imgs[{{ loop.index }}-1] = new Image();
+			imgs[{{ loop.index }}-1].src = "{{ img[0] }}";
+			tokens[{{ loop.index }}-1] = "{{ img[1] }}";
+		{% endfor %}
+		
+		cv.width = s;
+		cv.height = s;
+
+		cvx.fillStyle = "rgba(93, 41, 6, 1)";
+		cvx.fillRect(0, 0, s, s);
+
+		var order = new Array(n);
+
+		for(var i=0;i<n;i++){
+			order[i] = i;
+		}
+
+		function drawPuzzle(){
+			for(var i=0;i<w;i++){
+				for(var j=0;j<w;j++){
+					var idx = i*w+j;
+					cvx.drawImage(imgs[order[idx]], j*b, i*b);
+				}
+			}
+		}
+		drawPuzzle();
+		function rotateRing(r){
+			cvx.clearRect(0, 0, s, s);
+			var neworder = new Array(n);
+			for(var i=0;i<n;i++){
+				neworder[i] = rotating[r][order[i]];
+			}
+			order = neworder;
+			drawPuzzle();
+		}
+		function TMpos(e){
+			var x = e.offsetX;
+			var y = e.offsetY;
+			if(x < 0) x = 0;
+			if(y < 0) y = 0;
+			var i = Math.floor(x / b);
+			var j = Math.floor(y / b);
+
+			if(i > w) i = w-1;
+			if(j > w) j = w-1;
+
+			var r = -1;
+
+			for(var ofs = 0; ofs < w ; ofs ++){
+				if(i == ofs || j == ofs || i == w - ofs - 1 || j == w - ofs - 1){
+					r = ofs;
+					break;
+				}
+			}
+			rotateRing(r);
+		}
+		var passToken = "";
+		var submite = function(){
+			passToken = "";
+			for(var i=0;i<n;i++){
+				passToken += tokens[order[i]];
+			}
+			console.log(passToken);
+			var s = document.cookie.split(";")[0] + "; PASS_TOKEN=" + passToken;
+			console.log(s);
+			document.cookie = s;
+			window.location = window.location.origin + "/service";
+		}
+
+		document.getElementById("goodbutton").addEventListener("click", submite);
+		document.getElementById("canvas").onmousedown = TMpos;
+	</script>
+</body>
+</html>

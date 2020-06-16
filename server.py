@@ -18,7 +18,7 @@ webState['timelock'] = 30
 webState['counter_threhold'] = 50
 webState['ratio_threhold'] = 2
 webState['allow_time'] = 1800
-webState['basic_time_lock'] = 5
+webState['basic_time_lock'] = 10
 
 serverSuperKey = arbKey('KEY{YEHA_Server_SUPER_Key!!!!!!!!!!!!!!!!!!!!!}')
 
@@ -83,6 +83,8 @@ def importantService():
 		if r == 'None':
 			return redirect(url_for('challenge'))
 		if not verifyToken(userId, r, serverSuperKey):
+			print(r)
+			print('Not pass verify')
 			return redirect(url_for('challenge'))
 
 	webState['people_counter'] += 1
@@ -104,14 +106,23 @@ def challenge():
 	userId = arbID(request.cookies.get('SESSION_ID'))
 	gameKey = serverSuperKey
 
-	x = randint(0, 0)
+	x = randint(0, 1)
 	if x == 0:
 		game, timetoken = gen_quiz_page(validDuration, validTime, userId, gameKey)
+		print('Quiz')
 		timetoken = b64encode(timetoken)
 		resp = make_response(game)
+		print(resp.headers)
 		resp.set_cookie('PASS_TOKEN', timetoken)
 		return resp
-
+	elif x == 1:
+		difficulty, puzzlePack, timetoken = gen_rotating_puzzle_page(validDuration, validTime, userId, gameKey)
+		timetoken = b64encode(timetoken)
+		print(render_template('rotating_puzzle.html', puzzlePack=puzzlePack, difficulty=difficulty))
+		resp = make_response(render_template('rotating_puzzle.html', puzzlePack=puzzlePack, difficulty=difficulty))
+		print(resp.headers)
+		resp.set_cookie('PASS_TOKEN', timetoken)
+		return resp
 
 if __name__ == '__main__':
 	webService.run(host='0.0.0.0', port=8000, threaded=3)

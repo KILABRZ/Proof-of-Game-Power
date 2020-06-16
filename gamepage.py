@@ -1,5 +1,5 @@
 from cookies_and_tokens import *
-from random import randint, shuffle
+from random import randint, shuffle, choice
 
 def gen_gamepage_template(useT, expET, userId, gameKey):
 	gameKey = arbKey(gameKey)
@@ -87,7 +87,64 @@ def gen_quiz_page(validDuration, validTime, userId, gameKey):
 
 	return js, timeToken
 
+def CHUNKKKKKKKKKKKKING(s, n):
+	L = len(s)
+	dl = L / n
+	chp = [s[int(i*dl):int((i+1)*dl)] for i in range(n)]
+	return chp
+
+def randomPuzzleRotate(puzzlePack, n):
+	rotate0 = [2, 0, 3, 1]
+	rotate1_0 = [0, 1, 2, 3, 4, 9, 5, 7, 8, 10, 6, 11, 12, 13, 14, 15]
+	rotate1_1 = [4, 0, 1, 2, 8, 5, 6, 3, 12, 9, 10, 7, 13, 14, 15, 11]
+	rotate_2_0 = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 20, 14, 16, 17, 18, 19, 21, 15, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35]
+	rotate_2_1 = [0, 1, 2, 3, 4, 5, 6, 13, 7, 8, 9, 11, 12, 19, 14, 15, 10, 17, 18, 25, 20, 21, 16, 23, 24, 26, 27, 28, 22, 29, 30, 31, 32, 33, 34, 35]
+	rotate_2_2 = [6, 0, 1, 2, 3, 4, 12, 7, 8, 9, 10, 5, 18, 13, 14, 15, 16, 11, 24, 19, 20, 21, 22, 17, 30, 25, 26, 27, 28, 23, 31, 32, 33, 34, 35, 29]
+
+	rlen = (4, 12, 20)
+	rotating = [[rotate0], [rotate1_0, rotate1_1], [rotate_2_0, rotate_2_1, rotate_2_2]][n]
+
+	for i, rotate in enumerate(rotating):
+		s = randint(rlen[i]//2, rlen[i]-1)
+		
+		npp = [0 for j in range(len(puzzlePack))]
+		for _ in range(s):
+			for i, r in enumerate(rotate):
+				npp[i] = puzzlePack[r]
+			puzzlePack = list(tuple(npp))
+	return puzzlePack
+
+
+def gen_rotating_puzzle_page(validDuration, validTime, userId, gameKey):
+	totalDifficulties = 3
+	difficulty = min(totalDifficulties-1, validTime // 30)
+	puzzleCount = (4, 16, 36)[difficulty]
+
+	problemList = open('./static/rotating_puzzle/problemlist.txt', 'r').read().split('\n')[:-1]
+	problemList = [c.split(',') for c in problemList]
+	problemsGroup = [[] for _ in range(totalDifficulties)]
+	for p in problemList:
+		problemsGroup[int(p[1])].append(p[0])
+
+	problemPath = './static/rotating_puzzle/{}'.format(choice(problemsGroup[difficulty]))
+	imgPathes = open('{}/problem_description.txt'.format(problemPath), 'r').read().split(';')[:-1]
+	imgPathes = ['{}/{}'.format(problemPath, c) for c in imgPathes]
+	tokenLength = max(6 * puzzleCount, 60)
+	timeToken, passToken = generateToken(validDuration, validTime, userId, gameKey, tokenLength)
+	print('passtoken =', str(b64encode(passToken), 'ascii'))
+	print('timetoken =', str(b64encode(timeToken), 'ascii'))
+	presToken = CHUNKKKKKKKKKKKKING(str(b64encode(passToken), 'ascii'), puzzleCount)
+	puzzlePack = [c for c in zip(imgPathes, presToken)]
+	puzzlePack = randomPuzzleRotate(puzzlePack, difficulty)
+
+	return difficulty, puzzlePack, timeToken
+
 
 
 if __name__ == '__main__':
-	gen_gamepage_template(600, 30, 'abcdef', 'bbb')
+	userId = arbID('user')
+	serverSuperKey = arbKey('KEY{YEHA_Server_SUPER_Key!!!!!!!!!!!!!!!!!!!!!}')
+	gen_rotating_puzzle_page(10, 100, userId, serverSuperKey)
+
+# vyGPvrWY6v0f6pTbnRb5V//WJeq794/1K0FyXF4NOKdR5o5hCXnyv3NTnnG9trHOcmylkXDMGS6T652kkqJF6LMy4ow3NHhWf/gWZrtob+WimisoalQ70TbKg0GH4SqlT6EYLFc23E94Cfjhn4277rEAAeWjgbTkDG3xvmmKf3F5DH8pSTqpbpgPuMm1iYnMLs4SJgF1h4jG9OxqQ1Uf3D+Ot+lwktTNViGKmWHbJU+IOaWhFxnGVInSavIRNIS+4o1JLaOks8Rbr96qbHhicIYfnrf5QAGU
+# vyGPvrWY6v0f6pTbnRb5V//WJeq794/1K0FyXF4NOKdR5o5hCXnyv3NTnnG9trHOcmylkXDMGS6T652kkqJF6LMy4ow3NHhWf/gWZrtob+WimisoalQ70TbKg0GH4SqlT6EYLFc23E94Cfjhn4277rEAAeWjgbTkDG3xvmmKf3F5DH8pSTqpbpgPuMm1iYnMLs4SJgF1h4jG9OxqQ1Uf3D+Ot+lwktTNViGKmWHbJU+IOaWhFxnGVInSavIRNIS+4o1JLaOks8Rbr96qbHhicIYfnrf5QAGU
