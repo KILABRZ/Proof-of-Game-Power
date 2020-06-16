@@ -28,7 +28,7 @@ def gen_gamepage_template(useT, expET, userId, gameKey):
 
 
 def gen_quiz_page(validDuration, validTime, userId, gameKey):
-	problemCount = min(validTime // 10 + 1, 10)
+	problemCount = min(int(validTime // 10 + 1), 10)
 	problems = open('./resource/quiz/problems.txt', 'r').read().split('\n')[:-1]
 	shuffle(problems)
 	problems = problems[:problemCount]
@@ -44,7 +44,7 @@ def gen_quiz_page(validDuration, validTime, userId, gameKey):
 	if len(probToken) < 60:
 		probToken = probToken + b'\x00' * len(passToken[len(probToken):])
 	
-
+	print('passtoken =', b64encode(passToken))
 	xxxxToken = OTP(passToken, probToken)
 
 	htmlheader = '<html><title> Speed Quiz {} !!!</title><body>'.format(problemCount)
@@ -60,12 +60,12 @@ def gen_quiz_page(validDuration, validTime, userId, gameKey):
 	script += '<div style="display: flex; justify-content: center; align-items: center; height: 8vh; width: 100%; margin-bottom: 15px;">'
 	script += '<div style="display: inline-block; width: 10%; "> <button id="submit_button" style="font-size: 40px;"> Submit </button> </div>'
 	script += '</div>'
-	script += '<h1 style="text-align: center; font-size: 20px; margin-bottom: 12px;"> or pass after <b id = "supernumber"> X </b> seconds. </h1>'
+	script += '<h1 style="text-align: center; font-size: 20px; margin-bottom: 12px;"> or auto pass after <b id = "timecounter"> {} </b> seconds. </h1>'.format(validTime)
 	
 
 	script += '<script>'
-	script += 'var initialWT = {};'.format(validTime+3)
-	script += 'var s = function(){ if(initialWT <= 0) { initialWT = 0; return 0;} initialWT--; document.getElementById("supernumber").innerHTML = initialWT; if(initialWT <= 0) { window.location = window.location.origin + "/service"; } };'
+	script += 'var initialWT = {};'.format(validTime+10)
+	script += 'var s = function(){ if(initialWT <= 0) { initialWT = 0; return 0;} initialWT--; document.getElementById("timecounter").innerHTML = initialWT; if(initialWT <= 0) { window.location = window.location.origin + "/service"; } };'
 	script += 'window.setInterval(s, 1000);'
 	script += 'var xxxxToken = "{}";'.format(str(b64encode(xxxxToken), 'ascii'))
 	script += 'var recoToken = "";'
@@ -75,8 +75,7 @@ def gen_quiz_page(validDuration, validTime, userId, gameKey):
 	script += 'xxxxToken = atob(xxxxToken);'
 	script += 'for(var i=0;i<recoToken.length;i++){ssssToken += String.fromCharCode(xxxxToken[i].charCodeAt(0) ^ recoToken[i].charCodeAt(0));}'
 	script += 'xxxxToken = ssssToken + xxxxToken.substr(recoToken.length);'
-	script += 'document.cookie = document.cookie.split(";")[0] + "; PASS_TOKEN=" + btoa(xxxxToken);'
-	script += 'window.location = window.location.origin + "/service"; };'
+	script += 'window.location = window.location.origin + "/service?PASS_TOKEN="+ btoa(xxxxToken).split("+").join("*"); };'
 	script += 'document.getElementById("submit_button").addEventListener("click", e);'
 
 	script += '</script>'
@@ -99,7 +98,7 @@ def randomPuzzleRotate(puzzlePack, difficulty):
 	r = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10)[difficulty]
 	piv = (w-1) / 2
 
-	N = r ** 2 + 20
+	N = r ** 2 + 20 + randint(5, 21)
 
 	order = [i for i in range(w*w)]
 	neworder = [i for i in range(w*w)]
@@ -143,7 +142,7 @@ def randomPuzzleRotate(puzzlePack, difficulty):
 
 def gen_rotating_puzzle_page(validDuration, validTime, userId, gameKey):
 	totalDifficulties = 10
-	difficulty = min(totalDifficulties-1, validTime // 5)
+	difficulty = min(int(totalDifficulties-1), int(validTime // 5))
 	puzzleCount = (4, 16, 36, 64, 100, 144, 192, 256, 324, 400)[difficulty]
 
 	problemList = open('./static/rotating_puzzle/problemlist.txt', 'r').read().split('\n')[:-1]
@@ -155,7 +154,7 @@ def gen_rotating_puzzle_page(validDuration, validTime, userId, gameKey):
 	problemPath = './static/rotating_puzzle/{}'.format(choice(problemsGroup[difficulty]))
 	imgPathes = open('{}/problem_description.txt'.format(problemPath), 'r').read().split(';')[:-1]
 	imgPathes = ['{}/{}'.format(problemPath, c) for c in imgPathes]
-	tokenLength = max(6 * puzzleCount, 60)
+	tokenLength = max(3 * puzzleCount, 60)
 	timeToken, passToken = generateToken(validDuration, validTime, userId, gameKey, tokenLength)
 	print('passtoken =', str(b64encode(passToken), 'ascii'))
 	print('timetoken =', str(b64encode(timeToken), 'ascii'))

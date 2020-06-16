@@ -28,3 +28,13 @@ theline6,6
 theline7,7
 theline8,8
 theline9,9
+thexp0,0
+thexp1,1
+thexp2,2
+thexp3,3
+thexp4,4
+thexp5,5
+thexp6,6
+thexp7,7
+thexp8,8
+thexp9,9

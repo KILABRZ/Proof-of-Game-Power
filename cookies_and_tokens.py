@@ -57,20 +57,24 @@ def verifyToken(userId, token, gameKey):
 	except:
 		return False
 
-	xnonce = token[:16]
-	encryptedToken = token[16:]
-	aes = AES.new(gameKey, AES.MODE_GCM, nonce=xnonce)
-
+	try:
+		xnonce = token[:16]
+		encryptedToken = token[16:]
+		aes = AES.new(gameKey, AES.MODE_GCM, nonce=xnonce)
+	except:
+		return False
 	try:
 		recoveryToken = aes.decrypt(encryptedToken)
 	except:
 		return False
 
 
-
-	t_userId = recoveryToken[:16]
-	t_validTime = int(str(recoveryToken[16:28], 'ascii'))
-	t_expiredTime = int(str(recoveryToken[28:40], 'ascii'))
+	try:
+		t_userId = recoveryToken[:16]
+		t_validTime = int(str(recoveryToken[16:28], 'ascii'))
+		t_expiredTime = int(str(recoveryToken[28:40], 'ascii'))
+	except:
+		return False
 
 	if userId != t_userId:
 		return False

@@ -5,27 +5,28 @@
 	</title>
 </head>	
 <body style='background-color: #030303'>
-	<canvas id="canvas" height="924" width="1920">
+	<div style="display: inline-flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 98vh">
+	<canvas id="canvas" height="500" width="1920"></canvas>
+	<a href="/service"><button style="border: 2px solid white;width: 100%; font-size:60px; background: #FFFFFF; color: #000000; margin-bottom: 30px;"> Service Page </button></a>
+	<a href="/challenge"><button style="border: 2px solid white;width: 100%; font-size:60px; background: #FFFFFF; color: #000000; margin-bottom: 10px;"> Challenge Page </button> </a>
+</div>
 	<script>
 		var canvas = document.getElementById("canvas").getContext("2d");
-		var height = window.innerHeight;
-		var width = window.innerWidth;
 		canvas.fillStyle = "#0FF";
-		canvas.font = "120px JetBrains Mono";
-		canvas.fillText(" Hello, Canvas,", 0, 120);
-		canvas.fillText(" this is an example page,", 0, 250);
-		canvas.fillText(" text fades out,", 0, 380);
-		canvas.fillText(" canvas is so cool.", 0, 510);
-		canvas.fillText(" Yaaaaaaaaaaaaaaaaa.", 0, 770);
+		canvas.font = "80px JetBrains Mono";
+		canvas.fillText(" Hello, Final Project,", 420, 80);
+		canvas.fillText(" This is an index page,", 400, 170);
+		canvas.fillText(" Text fades out,", 560, 260);
+		canvas.fillText(" Yaaaaaaaaaaa", 620, 350);
 
 		function fadeout(canvas, speed){
 			canvas.fillStyle = "rgba(0, 0, 0, "+speed+")";
-			canvas.fillRect(0, 0, width, height);
+			canvas.fillRect(0, 0, 1920, 500);
 		}
 
 		function draw()
 		{
-			fadeout(canvas, 0.01);
+			fadeout(canvas, 0.1);
 		}
 
 		setInterval(draw, 500);

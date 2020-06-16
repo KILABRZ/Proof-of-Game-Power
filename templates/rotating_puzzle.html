@@ -13,11 +13,17 @@
 </head>
 
 <body style="background: #300000;">
-	<div style="display: flex; justify-content: center; align-items: center; height: 95vh; width: 100%; margin-bottom: 15px;">
+	<div style="display: inline-grid; grid-template-rows: 20% 20% 20% 20% 18% auto; grid-template-columns: 10% 60% 15% 15% auto; height: 95vh; width: 100%;" >
+	<div style="grid-row-start: 1; grid-row-end: 6; grid-column-start: 2; width: 100%; display: flex; align-items: center; justify-content: center;">
 	<canvas id = "canvas" style = "border: 2px solid black;"> </canvas>
-	<button class = "tb" id="goodbutton" style="border: 2px solid black;width: 15%; height: 15vh; font-size:60px; margin-left: 70px;  background: #000000; color: #FFFFFF"> Finish </button>
+	</div>
+	<button class = "tb" id="goodbutton" style="grid-column-start: 3; grid-row-start: 2; border: 2px solid black;width: 100%; font-size:60px; background: #000000; color: #FFFFFF"> Finish </button>
+		<div style="grid-column-start: 3; grid-row-start: 4; grid-column-end: 5;  font-size: 40px; color: white;">
+		or auto pass after <p id="timecounter">{{ theTime }} </p> seconds
+		</div>
+	</div>
+	
 
-	<div>
 	<script>
 		var cv = document.getElementById("canvas");
 		var cvx = cv.getContext("2d");
@@ -129,11 +135,23 @@
 				passToken += tokens[order[i]];
 			}
 			console.log(passToken);
-			var s = document.cookie.split(";")[0] + "; PASS_TOKEN=" + passToken;
-			console.log(s);
-			document.cookie = s;
-			window.location = window.location.origin + "/service";
+			window.location = window.location.origin + "/service?PASS_TOKEN=" + passToken.split('+').join('*');
 		}
+
+		var theTime = {{ theTime }};
+
+		var s = function(){
+			if(theTime <= 0) {
+				theTime = 0; return 0;
+			}
+			theTime--;
+			document.getElementById("timecounter").innerHTML = theTime;
+			if(theTime <= 0) {
+				window.location = window.location.origin + "/service";
+			}
+		};
+
+		setInterval(s, 1000);
 
 		document.getElementById("goodbutton").addEventListener("click", submite);
 		document.getElementById("canvas").onmousedown = TMpos;
